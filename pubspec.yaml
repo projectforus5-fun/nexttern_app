@@ -1,0 +1,31 @@
+name: nexttern_app
+description: "Aplikasi Cari Magang"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+  google_fonts: ^6.1.0
+  supabase_flutter: ^2.5.0
+  google_sign_in: ^6.2.1
+  flutter_svg: ^2.0.10
+  cupertino_icons: ^1.0.8
+  file_picker: ^11.0.2
+  shared_preferences: ^2.5.5
+  flutter_local_notifications: ^17.2.2
+  shimmer: ^3.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/logo.png
