@@ -13,6 +13,7 @@ class CVScreen extends StatefulWidget {
 class _CVScreenState extends State<CVScreen> {
   bool _isLoading = false;
   String? _currentCvUrl;
+  String _userName = 'Pejuang';
 
   @override
   void initState() {
@@ -20,19 +21,23 @@ class _CVScreenState extends State<CVScreen> {
     _fetchUserData();
   }
 
-  // Mengambil data CV saat ini dari tabel profiles
+  // Mengambil data CV dan Nama dari tabel profiles
   Future<void> _fetchUserData() async {
     final user = Supabase.instance.client.auth.currentUser;
     if (user != null) {
       final data = await Supabase.instance.client
           .from('profiles')
-          .select('cv_url')
+          .select('cv_url, full_name')
           .eq('id', user.id)
           .maybeSingle();
 
       if (mounted && data != null) {
         setState(() {
           _currentCvUrl = data['cv_url'];
+          final fullName = data['full_name'] as String?;
+          if (fullName != null && fullName.isNotEmpty) {
+            _userName = fullName.split(' ')[0]; // Ambil nama depan
+          }
         });
       }
     }
@@ -121,8 +126,8 @@ class _CVScreenState extends State<CVScreen> {
 
             Text(
               _currentCvUrl != null
-                  ? 'CV ini akan digunakan sebagai referensi utama saat Tuan melamar magang.'
-                  : 'Unggah CV terbaik Tuan dalam format PDF agar perusahaan bisa melihat potensi Tuan.',
+                  ? 'CV ini akan digunakan sebagai referensi utama saat $_userName melamar magang.'
+                  : 'Unggah CV terbaik $_userName dalam format PDF agar perusahaan bisa melihat potensi $_userName.',
               style: TextStyle(fontSize: 14, color: isDark ? Colors.grey.shade400 : Colors.grey),
               textAlign: TextAlign.center,
             ),

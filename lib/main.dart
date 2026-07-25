@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
               brightness: Brightness.light,
             ),
             useMaterial3: true,
-            scaffoldBackgroundColor: Colors.white,
+            scaffoldBackgroundColor: const Color(0xFFF3F2FF), // Warna Ungu Pastel Lembut
           ),
           
           darkTheme: ThemeData(

@@ -154,7 +154,8 @@ class _BookmarkScreenState extends State<BookmarkScreen> with SingleTickerProvid
                     jobTitle: job['title'] ?? 'Posisi Tidak Diketahui',
                     company: job['company'] ?? 'Perusahaan Tidak Diketahui',
                     status: app['status'] ?? 'Pending',
-                    date: app['created_at'] ?? '', // Nanti bisa diformat tanggalnya
+                    date: app['created_at'] ?? '',
+                    logoUrl: job['company_logo'], // MENGHUBUNGKAN LINK LOGO DARI SUPABASE
                   );
                 },
               );
@@ -164,7 +165,7 @@ class _BookmarkScreenState extends State<BookmarkScreen> with SingleTickerProvid
       ),
     );
   }
-  Widget _buildApplicationCard({required String jobTitle, required String company, required String status, required String date}) {
+  Widget _buildApplicationCard({required String jobTitle, required String company, required String status, required String date, String? logoUrl}) {
     Color statusColor;
     switch (status.toLowerCase()) {
       case 'diterima': statusColor = Colors.green; break;
@@ -185,12 +186,25 @@ class _BookmarkScreenState extends State<BookmarkScreen> with SingleTickerProvid
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            width: 48, height: 48,
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF3F2FF), 
-              borderRadius: BorderRadius.circular(12)
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.business_center, color: Color(0xFF4A44F2)),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: logoUrl != null && logoUrl.toString().trim().isNotEmpty && logoUrl.toString() != "null"
+                  ? Image.network(
+                      logoUrl.toString().trim(),
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.business, color: Colors.grey, size: 24),
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return const Center(child: SizedBox(width: 15, height: 15, child: CircularProgressIndicator(strokeWidth: 2)));
+                      },
+                    )
+                  : const Icon(Icons.business, color: Colors.grey, size: 24),
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(

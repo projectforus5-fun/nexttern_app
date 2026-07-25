@@ -19,6 +19,19 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  late Future<Map<String, dynamic>> _profileFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _profileFuture = _getProfileData();
+  }
+
+  void _refreshProfile() {
+    setState(() {
+      _profileFuture = _getProfileData();
+    });
+  }
 
   // Fungsi mengambil data dari Supabase (Tabel: profiles)
   Future<Map<String, dynamic>> _getProfileData() async {
@@ -118,7 +131,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       extendBody: true,
 // ... (lanjutan kode Stack dan FutureBuilder Tuan Muda yang sebelumnya ada di sini)
       body: FutureBuilder<Map<String, dynamic>>(
-        future: _getProfileData(),
+        future: _profileFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator(color: Colors.white));
@@ -204,16 +217,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   context,
                                   Icons.edit_outlined,
                                   'Edit Profil',
-                                  onTap: () async { // 1. Tambahkan async di sini
-                                    // 2. Tambahkan await untuk menunggu user selesai mengedit
+                                  onTap: () async {
                                     final result = await Navigator.push(
                                       context,
                                       MaterialPageRoute(builder: (context) => const EditProfileScreen()),
                                     );
 
-                                    // 3. Jika user kembali setelah menekan "Simpan Profil" (membawa nilai true)
                                     if (result == true) {
-                                      setState(() {}); // Picu rekonstruksi widget untuk menarik data baru dari Supabase
+                                      _refreshProfile();
                                     }
                                   },
                                 ),

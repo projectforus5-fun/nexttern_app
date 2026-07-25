@@ -47,35 +47,27 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleGoogleSignIn() async {
     setState(() => _isLoading = true);
     try {
-      // Ganti dengan Web Client ID dari Google Cloud Console kamu
       const webClientId = '624967564367-jr7e7b80ihfr2heu066onmurujkglbra.apps.googleusercontent.com';
-
-      final googleSignIn = GoogleSignIn(
-        serverClientId: webClientId,
-      );
+      final googleSignIn = GoogleSignIn(serverClientId: webClientId);
       final googleUser = await googleSignIn.signIn();
       final googleAuth = await googleUser?.authentication;
-      final accessToken = googleAuth?.accessToken;
-      final idToken = googleAuth?.idToken;
 
-      if (idToken == null || accessToken == null) {
-        throw 'Gagal mendapatkan token dari Google.';
-      }
-
-      await Supabase.instance.client.auth.signInWithIdToken(
-        provider: OAuthProvider.google,
-        idToken: idToken,
-        accessToken: accessToken,
-      );
-
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MainScreen()),
+      if (googleAuth?.idToken != null && googleAuth?.accessToken != null) {
+        await Supabase.instance.client.auth.signInWithIdToken(
+          provider: OAuthProvider.google,
+          idToken: googleAuth!.idToken!,
+          accessToken: googleAuth.accessToken!,
         );
+
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const MainScreen()),
+          );
+        }
       }
     } catch (e) {
-      if (mounted) _showSnackBar('Gagal masuk dengan Google: $e', isError: true);
+      if (mounted) _showSnackBar('Gagal masuk dengan Google.', isError: true);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -100,16 +92,10 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
-          onPressed: () {
-            // Kembali ke MainScreen agar menu bawah muncul
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const MainScreen()),
-                  (route) => false,
-            );
-          },
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SafeArea(
@@ -119,19 +105,39 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 10),
-              // Logo atau Ikon Aplikasi
+              // Ikon Tas Ungu
               Container(
                 height: 50, width: 50,
-                decoration: BoxDecoration(color: const Color(0xFF4A44F2), borderRadius: BorderRadius.circular(14)),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4A44F2),
+                  borderRadius: BorderRadius.circular(14),
+                ),
                 child: const Icon(Icons.work_outline, color: Colors.white, size: 28),
               ),
               const SizedBox(height: 24),
-              Text('Masuk ke Akun Anda', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: -0.5, color: Theme.of(context).colorScheme.onSurface)),
+              // Heading
+              Text(
+                'Masuk ke Akun Anda',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.5,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
               const SizedBox(height: 8),
-              Text('Selamat datang kembali di Nexttern. Silakan masukkan kredensial Anda untuk melanjutkan.', style: TextStyle(fontSize: 15, color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, height: 1.5)),
+              // Subheading
+              Text(
+                'Selamat datang kembali di Nexttern. Silakan masukkan kredensial Anda untuk melanjutkan.',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                  height: 1.5,
+                ),
+              ),
               const SizedBox(height: 40),
 
-              // Form Email
+              // Field Email
               _buildTextField(
                 context,
                 controller: _emailController,
@@ -141,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Form Password
+              // Field Password
               _buildTextField(
                 context,
                 controller: _passwordController,
@@ -156,13 +162,22 @@ class _LoginScreenState extends State<LoginScreen> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ForgotPasswordScreen())),
-                  child: const Text('Lupa Kata Sandi?', style: TextStyle(color: Color(0xFF4A44F2), fontWeight: FontWeight.w600)),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
+                  ),
+                  child: const Text(
+                    'Lupa Kata Sandi?',
+                    style: TextStyle(
+                      color: Color(0xFF4A44F2),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
 
-              // Tombol Login
+              // Tombol Masuk
               SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -181,7 +196,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 30),
 
-              // Divider Opsi Lain
+              // Divider
               Row(
                 children: [
                   Expanded(child: Divider(color: isDark ? Colors.grey.shade800 : Colors.grey.shade300)),
@@ -194,12 +209,11 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Tombol Social Login
+              // Tombol Google & Apple
               Row(
                 children: [
                   Expanded(
                     child: _buildSocialBtn(
-                      context,
                       'Google',
                       Icons.g_mobiledata_rounded,
                       onPressed: _isLoading ? null : _handleGoogleSignIn,
@@ -208,26 +222,32 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: _buildSocialBtn(
-                      context,
                       'Apple',
                       Icons.apple,
-                      onPressed: () {
-                        _showSnackBar('Login dengan Apple akan segera hadir!');
-                      },
+                      onPressed: () => _showSnackBar('Fitur Apple Login segera hadir!'),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 30),
 
-              // Navigasi ke Register
+              // Daftar Sekarang
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Belum memiliki akun?', style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600)),
+                  Text(
+                    'Belum memiliki akun?',
+                    style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600),
+                  ),
                   TextButton(
-                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterScreen())),
-                    child: const Text('Daftar Sekarang', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF4A44F2))),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                    ),
+                    child: const Text(
+                      'Daftar Sekarang',
+                      style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF4A44F2)),
+                    ),
                   ),
                 ],
               ),
@@ -239,7 +259,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // Desain Input Field Super Elegan
   Widget _buildTextField(BuildContext context, {required TextEditingController controller, required String label, required IconData icon, bool isPassword = false, bool obscureText = false, VoidCallback? onToggleVisibility, TextInputType keyboardType = TextInputType.text}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return TextFormField(
@@ -261,18 +280,24 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // Desain Tombol Social Login
-  Widget _buildSocialBtn(BuildContext context, String text, IconData icon, {VoidCallback? onPressed}) {
+  Widget _buildSocialBtn(String text, IconData icon, {VoidCallback? onPressed}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return OutlinedButton.icon(
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 14),
         side: BorderSide(color: isDark ? Colors.grey.shade800 : Colors.grey.shade300),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
       ),
       onPressed: onPressed,
-      icon: Icon(icon, color: Theme.of(context).colorScheme.onSurface, size: 24),
-      label: Text(text, style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w600)),
+      icon: Icon(icon, size: 24, color: isDark ? Colors.white : Colors.black),
+      label: Text(
+        text,
+        style: TextStyle(
+          color: isDark ? Colors.white : Colors.black,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 }

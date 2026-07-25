@@ -65,16 +65,17 @@ class _JobCardState extends State<JobCard> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     color: isDark ? Colors.grey.shade900 : Colors.grey.shade100,
-                    image: widget.job['company_logo'] != null && widget.job['company_logo'].toString().isNotEmpty
-                        ? DecorationImage(
-                      image: NetworkImage(widget.job['company_logo']),
-                      fit: BoxFit.contain,
-                    )
-                        : null,
                   ),
-                  child: widget.job['company_logo'] == null || widget.job['company_logo'].toString().isEmpty
-                      ? const Icon(Icons.business, color: Colors.grey)
-                      : null,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: widget.job['company_logo'] != null && widget.job['company_logo'].toString().trim().isNotEmpty
+                        ? Image.network(
+                            widget.job['company_logo'].toString().trim(),
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) => const Icon(Icons.business, color: Colors.grey),
+                          )
+                        : const Icon(Icons.business, color: Colors.grey),
+                  ),
                 ),
                 const SizedBox(width: 16),
 

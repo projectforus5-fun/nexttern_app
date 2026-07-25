@@ -158,16 +158,21 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: isDark ? Colors.grey.shade800 : Colors.grey.shade200),
                     color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-                    image: widget.job['company_logo'] != null && widget.job['company_logo'].toString().isNotEmpty
-                        ? DecorationImage(
-                      image: NetworkImage(widget.job['company_logo']),
-                      fit: BoxFit.contain,
-                    )
-                        : null,
                   ),
-                  child: widget.job['company_logo'] == null || widget.job['company_logo'].toString().isEmpty
-                      ? const Icon(Icons.business, color: Colors.grey, size: 30)
-                      : null,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: widget.job['company_logo'] != null && widget.job['company_logo'].toString().trim().isNotEmpty
+                        ? Image.network(
+                            widget.job['company_logo'].toString().trim(),
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) => const Icon(Icons.business, color: Colors.grey, size: 30),
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+                            },
+                          )
+                        : const Icon(Icons.business, color: Colors.grey, size: 30),
+                  ),
                 ),
                 IconButton(
                   icon: Icon(Icons.bookmark_border, size: 30, color: isDark ? Colors.grey.shade400 : Colors.grey),

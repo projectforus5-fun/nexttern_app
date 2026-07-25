@@ -32,7 +32,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _loadCurrentProfile() async {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
-
     try {
       final data = await Supabase.instance.client
           .from('profiles')
@@ -99,12 +98,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
         // Update atau Insert data ke tabel profiles (UPSERT)
         await Supabase.instance.client.from('profiles').upsert({
-          'id': user.id, // Pastikan ID disertakan untuk upsert
+          'id': user.id,
           'full_name': _nameController.text,
           'university': _univController.text,
           'major': _majorController.text,
           'semester': _semesterController.text,
-          'role': _roleController.text,
           'skills': _skillsController.text,
           'avatar_url': imageUrl,
           'updated_at': DateTime.now().toIso8601String(),
@@ -198,15 +196,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 24),
 
             // 1. Form Nama Lengkap
-            _buildTextField(context, 'Nama Lengkap', 'Contoh: Hamzah Fadhila', _nameController),
+            _buildTextField(context, 'Nama Lengkap', 'Contoh: Nama Lengkap Anda', _nameController),
             const SizedBox(height: 16),
 
             // 2. Form Kampus
-            _buildTextField(context, 'Asal Kampus / Sekolah', 'Contoh: Politeknik LP3I Jakarta', _univController),
+            _buildTextField(context, 'Asal Kampus / Sekolah', 'Contoh: Nama Universitas (Masukan Nama Universitas Anda)', _univController),
             const SizedBox(height: 16),
 
-            // 3. Form Jurusan
-            _buildTextField(context, 'Jurusan', 'Contoh: Manajemen Informatika', _majorController),
+            // 3. Form Program Studi
+            _buildTextField(context, 'Program Studi', 'Contoh: Program Studi Anda Saat Ini', _majorController),
             const SizedBox(height: 16),
 
             // 4. Form Semester
@@ -218,7 +216,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 16),
 
             // 6. Form Keahlian
-            _buildTextField(context, 'Keahlian Utama (Pisahkan dengan koma)', 'Contoh: CodeIgniter 4, Tailwind CSS', _skillsController),
+            _buildTextField(context, 'Keahlian Utama (Pisahkan dengan koma)', 'Contoh: Flutter, Dart, Figma', _skillsController),
             const SizedBox(height: 40),
 
             // --- TOMBOL SIMPAN ---
